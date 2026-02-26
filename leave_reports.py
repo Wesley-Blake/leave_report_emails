@@ -29,7 +29,6 @@ def month_selection() -> str:
 
 def leave_reports(file: str) -> dict[str,str]:
     file = Path(file)
-    result = {}
 
     if file.is_file():
         df = pd.read_csv(file)
@@ -46,6 +45,7 @@ def leave_reports(file: str) -> dict[str,str]:
     else:
         return {}
 
+    result = {}
     manager = df['ApproverEmail'].unique().tolist()
     for email in manager:
         employee_list = filtered_df[
