@@ -13,7 +13,7 @@ def email(cc: str, bcc: list[str], pay_period: str, body: str) -> None:
     mail.CC = cc
     mail.BCC = '; '.join(bcc)
     mail.Subject = f"Leave Report Month {pay_period}"
-    with open('Leave-Reports\\secret.txt', 'r') as file:
+    with open('leave_report_emails\\secrets.txt', 'r') as file:
         attachment = Path(file.readline().strip())
     if attachment.is_file():
         mail.Attachments.Add(str(attachment))
