@@ -21,11 +21,21 @@ def month_selection() -> str:
         for i, value in months_dict.items():
             print(i,value)
         month = input("Month of interest (int): ")
+        if input(f"Is {months_dict[month]} correct? [Y/n] ") == 'n': continue
         if month.isdigit() and month in months_dict.keys():
             return months_dict[month]
         else:
             print("Failed to detect Month.")
 
+def loading_bar(length, index=1, pre_fix = ''):
+    BAR_LENGTH = 30
+    print()
+    if len(pre_fix) > 0: print(pre_fix)
+    while index <= length:
+        block = int(BAR_LENGTH * index / length)
+        bar = '=' * block + '-' * (BAR_LENGTH - block)
+        yield f'\r|{bar}| {index} / {length} emails sent.'
+        index += 1
 
 def leave_reports(file: str) -> dict[str,str]:
     file = Path(file)
@@ -47,7 +57,9 @@ def leave_reports(file: str) -> dict[str,str]:
 
     result = {}
     manager = df['ApproverEmail'].unique().tolist()
+    my_bar = loading_bar(length, pre_fix="Not Started Emails:")
     for email in manager:
+        print(next(my_bar), end='', flush=True)
         employee_list = filtered_df[
             filtered_df['ApproverEmail'] == email
         ]['Combined'].unique().tolist()
