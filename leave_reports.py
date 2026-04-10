@@ -57,9 +57,7 @@ def leave_reports(file: str) -> dict[str,str]:
 
     result = {}
     manager = df['ApproverEmail'].unique().tolist()
-    my_bar = loading_bar(length, pre_fix="Not Started Emails:")
     for email in manager:
-        print(next(my_bar), end='', flush=True)
         employee_list = filtered_df[
             filtered_df['ApproverEmail'] == email
         ]['Combined'].unique().tolist()
@@ -76,14 +74,16 @@ if __name__ == '__main__':
     PAY_MONTH = month_selection()
 
     files = []
-    if DOWNLOADS.is_dir():
-        for file in DOWNLOADS.iterdir():
-            if file.name.startswith('Leave_Report_Status'):
-                files.append(file.absolute())
-        target = max(files)
-        emails = leave_reports(target)
-        for manager, employees in emails.items():
-            body = \
+    if not DOWNLOADS.is_dir(): SystemExit("Downloads path doesn't exist.")
+    for file in DOWNLOADS.iterdir():
+        if file.name.startswith('Leave_Report_Status'):
+            files.append(file.absolute())
+    target = max(files)
+    emails = leave_reports(target)
+    length = len(emails)
+    my_bar = loading_bar(length, pre_fix="Not Started Emails:")
+    for manager, employees in emails.items():
+        body = \
 f"""
 Hi,
 
@@ -92,6 +92,6 @@ The month of {PAY_MONTH} is due on the 15th of the following month.
 
 *** If you see a person that shouldn't be there or multiple Leave Reports for 1 person, let me know. ***
 """
-            body += "\n".join(employees)
-            email(manager, [], PAY_MONTH, body)
-
+        body += "\n".join(employees)
+        print(next(my_bar), end='', flush=True)
+        email(manager, [], PAY_MONTH, body)
