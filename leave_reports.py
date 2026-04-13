@@ -81,7 +81,7 @@ if __name__ == '__main__':
     target = max(files)
     emails = leave_reports(target)
     length = len(emails)
-    my_bar = loading_bar(length, pre_fix="Not Started Emails:")
+    my_bar = loading_bar(length, pre_fix="Manager Emails:")
     for manager, employees in emails.items():
         body = \
 f"""
