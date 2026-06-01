@@ -95,3 +95,4 @@ The month of {PAY_MONTH} is due on the 15th of the following month.
         body += "\n".join(employees)
         print(next(my_bar), end='', flush=True)
         email(manager, [], PAY_MONTH, body)
+    print()
