@@ -2,6 +2,7 @@ from pathlib import Path
 import pandas as pd
 from win32com_email import email
 
+
 def month_selection() -> str:
     months_dict = {
         "1": "January",
@@ -27,17 +28,23 @@ def month_selection() -> str:
         else:
             print("Failed to detect Month.")
 
-def loading_bar(length, index=1, pre_fix = ''):
+
+def loading_bar(length, index=1, pre_fix=''):
     BAR_LENGTH = 30
     print()
-    if len(pre_fix) > 0: print(pre_fix)
+    if len(pre_fix) > 0:
+        print(pre_fix)
     while index <= length:
         block = int(BAR_LENGTH * index / length)
         bar = '=' * block + '-' * (BAR_LENGTH - block)
-        yield f'\r|{bar}| {index} / {length} emails sent.'
+        yield (
+            f'\r|{bar}| {index} / '
+            f'{length} emails sent.'
+        )
         index += 1
 
-def leave_reports(file: str) -> dict[str,str]:
+
+def leave_reports(file: str) -> dict[str, str]:
     file = Path(file)
 
     if file.is_file():
@@ -46,11 +53,28 @@ def leave_reports(file: str) -> dict[str,str]:
             print("Empty csv.")
             return {}
 
-        white_list = ['EmplID','FirstName','LastName','leave_report_status', 'ApproverEmail', 'EmplEmail']
+        white_list = [
+            'EmplID',
+            'FirstName',
+            'LastName',
+            'leave_report_status',
+            'ApproverEmail',
+            'EmplEmail',
+        ]
         df = df[white_list]
         df['EmplID'] = df['EmplID'].astype(str)
-        #df['Combined'] = df[['EmplID','FirstName','LastName']].astype(str).agg(' '.join, axis=1)
-        df['Combined'] = df['EmplID'] + ' ' + df['FirstName'] + ' ' + df['LastName']
+        # df['Combined'] = (
+        #     df[['EmplID', 'FirstName', 'LastName']]
+        #     .astype(str)
+        #     .agg(' '.join, axis=1)
+        # )
+        df['Combined'] = (
+            df['EmplID']
+            + ' '
+            + df['FirstName']
+            + ' '
+            + df['LastName']
+        )
         filtered_df = df[~(df['leave_report_status'] == 'Completed')]
     else:
         return {}
@@ -83,15 +107,17 @@ if __name__ == '__main__':
     length = len(emails)
     my_bar = loading_bar(length, pre_fix="Manager Emails:")
     for manager, employees in emails.items():
-        body = \
-f"""
+        body = (
+"""
 Hi,
 
 The below Leave Reports aren't complete yet.
 The month of {PAY_MONTH} is due on the 15th of the following month.
 
-*** If you see a person that shouldn't be there or multiple Leave Reports for 1 person, let me know. ***
-"""
+*** If you see a person that shouldn't be there or multiple Leave
+Reports for 1 person, let me know. ***
+""".format(PAY_MONTH=PAY_MONTH)
+        )
         body += "\n".join(employees)
         print(next(my_bar), end='', flush=True)
         email(manager, [], PAY_MONTH, body)

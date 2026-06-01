@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import win32com.client as win32
 
+
 def email(cc: str, bcc: list[str], pay_period: str, body: str) -> None:
     try:
         outlook = win32.Dispatch('outlook.application')
