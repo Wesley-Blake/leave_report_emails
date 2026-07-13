@@ -22,7 +22,8 @@ def month_selection() -> str:
         for i, value in months_dict.items():
             print(i,value)
         month = input("Month of interest (int): ")
-        if input(f"Is {months_dict[month]} correct? [Y/n] ") == 'n': continue
+        if input(f"Is {months_dict[month]} correct? [Y/n] ") == 'n':
+            continue
         if month.isdigit() and month in months_dict.keys():
             return months_dict[month]
         else:
@@ -81,12 +82,12 @@ def leave_reports(file: str) -> dict[str, str]:
 
     result = {}
     manager = df['ApproverEmail'].unique().tolist()
-    for email in manager:
+    for email_m in manager:
         employee_list = filtered_df[
-            filtered_df['ApproverEmail'] == email
+            filtered_df['ApproverEmail'] == email_m
         ]['Combined'].unique().tolist()
         if len(employee_list) > 0:
-            result.update({email: employee_list})
+            result.update({email_m: employee_list})
 
     return result
 
@@ -98,7 +99,8 @@ if __name__ == '__main__':
     PAY_MONTH = month_selection()
 
     files = []
-    if not DOWNLOADS.is_dir(): SystemExit("Downloads path doesn't exist.")
+    if not DOWNLOADS.is_dir():
+        raise SystemExit("Downloads path doesn't exist.")
     for file in DOWNLOADS.iterdir():
         if file.name.startswith('Leave_Report_Status'):
             files.append(file.absolute())
