@@ -16,13 +16,13 @@ def month_selection() -> str:
         "9": "September",
         "10": "October",
         "11": "November",
-        "12": "December"
+        "12": "December",
     }
     while True:
         for i, value in months_dict.items():
-            print(i,value)
+            print(i, value)
         month = input("Month of interest (int): ")
-        if input(f"Is {months_dict[month]} correct? [Y/n] ") == 'n':
+        if input(f"Is {months_dict[month]} correct? [Y/n] ") == "n":
             continue
         if month.isdigit() and month in months_dict.keys():
             return months_dict[month]
@@ -30,18 +30,15 @@ def month_selection() -> str:
             print("Failed to detect Month.")
 
 
-def loading_bar(length, index=1, pre_fix=''):
+def loading_bar(length, index=1, pre_fix=""):
     BAR_LENGTH = 30
     print()
     if len(pre_fix) > 0:
         print(pre_fix)
     while index <= length:
         block = int(BAR_LENGTH * index / length)
-        bar = '=' * block + '-' * (BAR_LENGTH - block)
-        yield (
-            f'\r|{bar}| {index} / '
-            f'{length} emails sent.'
-        )
+        bar = "=" * block + "-" * (BAR_LENGTH - block)
+        yield (f"\r|{bar}| {index} / {length} emails sent.")
         index += 1
 
 
@@ -55,62 +52,57 @@ def leave_reports(file: str) -> dict[str, str]:
             return {}
 
         white_list = [
-            'EmplID',
-            'FirstName',
-            'LastName',
-            'leave_report_status',
-            'ApproverEmail',
-            'EmplEmail',
+            "EmplID",
+            "FirstName",
+            "LastName",
+            "leave_report_status",
+            "ApproverEmail",
+            "EmplEmail",
         ]
         df = df[white_list]
-        df['EmplID'] = df['EmplID'].astype(str)
+        df["EmplID"] = df["EmplID"].astype(str)
         # df['Combined'] = (
         #     df[['EmplID', 'FirstName', 'LastName']]
         #     .astype(str)
         #     .agg(' '.join, axis=1)
         # )
-        df['Combined'] = (
-            df['EmplID']
-            + ' '
-            + df['FirstName']
-            + ' '
-            + df['LastName']
-        )
-        filtered_df = df[~(df['leave_report_status'] == 'Completed')]
+        df["Combined"] = df["EmplID"] + " " + df["FirstName"] + " " + df["LastName"]
+        filtered_df = df[~(df["leave_report_status"] == "Completed")]
     else:
         return {}
 
     result = {}
-    manager = df['ApproverEmail'].unique().tolist()
+    manager = df["ApproverEmail"].unique().tolist()
     for email_m in manager:
-        employee_list = filtered_df[
-            filtered_df['ApproverEmail'] == email_m
-        ]['Combined'].unique().tolist()
+        employee_list = (
+            filtered_df[filtered_df["ApproverEmail"] == email_m]["Combined"]
+            .unique()
+            .tolist()
+        )
         if len(employee_list) > 0:
             result.update({email_m: employee_list})
 
     return result
 
 
-if __name__ == '__main__':
-    DOWNLOADS = Path.home() / 'Downloads'
+if __name__ == "__main__":
+    DOWNLOADS = Path.home() / "Downloads"
 
-    #PAY_MONTH = input('Enter Month: ')
+    # PAY_MONTH = input('Enter Month: ')
     PAY_MONTH = month_selection()
 
     files = []
     if not DOWNLOADS.is_dir():
         raise SystemExit("Downloads path doesn't exist.")
     for file in DOWNLOADS.iterdir():
-        if file.name.startswith('Leave_Report_Status'):
+        if file.name.startswith("Leave_Report_Status"):
             files.append(file.absolute())
     target = max(files)
     emails = leave_reports(target)
     length = len(emails)
     my_bar = loading_bar(length, pre_fix="Manager Emails:")
     for manager, employees in emails.items():
-        body = (
-"""
+        body = """
 Hi,
 
 The below Leave Reports aren't complete yet.
@@ -119,8 +111,7 @@ The month of {PAY_MONTH} is due on the 15th of the following month.
 *** If you see a person that shouldn't be there or multiple Leave
 Reports for 1 person, let me know. ***
 """.format(PAY_MONTH=PAY_MONTH)
-        )
         body += "\n".join(employees)
-        print(next(my_bar), end='', flush=True)
+        print(next(my_bar), end="", flush=True)
         email(manager, [], PAY_MONTH, body)
     print()
