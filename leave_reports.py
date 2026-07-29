@@ -1,5 +1,7 @@
 from pathlib import Path
+
 import pandas as pd
+
 from win32com_email import email
 
 
@@ -44,32 +46,25 @@ def loading_bar(length, index=1, pre_fix=""):
 
 def leave_reports(file: str) -> dict[str, str]:
     file = Path(file)
-
-    if file.is_file():
-        df = pd.read_csv(file)
-        if df.empty:
-            print("Empty csv.")
-            return {}
-
-        white_list = [
-            "EmplID",
-            "FirstName",
-            "LastName",
-            "leave_report_status",
-            "ApproverEmail",
-            "EmplEmail",
-        ]
-        df = df[white_list]
-        df["EmplID"] = df["EmplID"].astype(str)
-        # df['Combined'] = (
-        #     df[['EmplID', 'FirstName', 'LastName']]
-        #     .astype(str)
-        #     .agg(' '.join, axis=1)
-        # )
-        df["Combined"] = df["EmplID"] + " " + df["FirstName"] + " " + df["LastName"]
-        filtered_df = df[~(df["leave_report_status"] == "Completed")]
-    else:
+    if not file.is_file():
         return {}
+    df = pd.read_csv(file)
+    if df.empty:
+        print("Empty csv.")
+        return {}
+
+    white_list = [
+        "EmplID",
+        "FirstName",
+        "LastName",
+        "leave_report_status",
+        "ApproverEmail",
+        "EmplEmail",
+    ]
+    df = df[white_list]
+    df["EmplID"] = df["EmplID"].astype(str)
+    df["Combined"] = df["EmplID"] + " " + df["FirstName"] + " " + df["LastName"]
+    filtered_df = df[~(df["leave_report_status"] == "Completed")]
 
     result = {}
     manager = df["ApproverEmail"].unique().tolist()
