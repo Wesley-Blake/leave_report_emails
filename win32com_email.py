@@ -1,13 +1,13 @@
-import sys
 from pathlib import Path
+
 import win32com.client as win32
 
 
-def email(cc: str, bcc: list[str], pay_period: str, body: str) -> None:
+def win_email(cc: str, bcc: list[str], pay_period: str, body: str) -> None:
     try:
         outlook = win32.Dispatch("outlook.application")
     except Exception as e:
-        sys.exit(f"Failed to create Outlook application: {e}")
+        raise SystemError("Failed to create Outlook application") from e
 
     mail = outlook.CreateItem(0)
     mail.CC = cc

@@ -1,8 +1,9 @@
 from pathlib import Path
 
 import pandas as pd
+import validators
 
-from win32com_email import email
+from win32com_email import win_email
 
 
 def month_selection() -> str:
@@ -26,7 +27,7 @@ def month_selection() -> str:
         month = input("Month of interest (int): ")
         if input(f"Is {months_dict[month]} correct? [Y/n] ") == "n":
             continue
-        if month.isdigit() and month in months_dict.keys():
+        if month.isdigit() and month in months_dict:
             return months_dict[month]
         else:
             print("Failed to detect Month.")
@@ -44,8 +45,9 @@ def loading_bar(length, index=1, pre_fix=""):
         index += 1
 
 
-def leave_reports(file: str) -> dict[str, str]:
-    file = Path(file)
+def leave_reports(file: Path | str) -> dict[str, str]:
+    if not isinstance(file, Path):
+        file = Path(file)
     if not file.is_file():
         return {}
     df = pd.read_csv(file)
@@ -69,6 +71,9 @@ def leave_reports(file: str) -> dict[str, str]:
     result = {}
     manager = df["ApproverEmail"].unique().tolist()
     for email_m in manager:
+        if not validators.email(email_m):
+            print(f"Skipping row(s) with invalid ApproverEmail: {email_m!r}")
+            continue
         employee_list = (
             filtered_df[filtered_df["ApproverEmail"] == email_m]["Combined"]
             .unique()
@@ -97,7 +102,7 @@ if __name__ == "__main__":
     length = len(emails)
     my_bar = loading_bar(length, pre_fix="Manager Emails:")
     for manager, employees in emails.items():
-        body = """
+        body = f"""
 Hi,
 
 The below Leave Reports aren't complete yet.
@@ -105,8 +110,8 @@ The month of {PAY_MONTH} is due on the 15th of the following month.
 
 *** If you see a person that shouldn't be there or multiple Leave
 Reports for 1 person, let me know. ***
-""".format(PAY_MONTH=PAY_MONTH)
+"""
         body += "\n".join(employees)
         print(next(my_bar), end="", flush=True)
-        email(manager, [], PAY_MONTH, body)
+        win_email(manager, [], PAY_MONTH, body)
     print()
