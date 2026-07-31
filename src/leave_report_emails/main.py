@@ -2,7 +2,6 @@ from pathlib import Path
 
 import pandas as pd
 import validators
-
 from win32com_email import win_email
 
 
